@@ -22,9 +22,8 @@ int main()
     }
     
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(18667);
-    struct in_addr *inp = &addr.sin_addr;
-    inet_aton("127.0.0.1", inp);
+    addr.sin_port = htons(14888);
+    addr.sin_addr.s_addr = INADDR_ANY;
 
     if(bind(listener, (struct sockaddr *)&addr, sizeof(addr)) < 0)
     {
