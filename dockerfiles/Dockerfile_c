@@ -1,0 +1,8 @@
+FROM ubuntu 
+RUN mkdir -p client
+WORKDIR /client
+COPY ./Client_server_graph/client.cpp ./
+RUN apt-get update
+RUN apt-get install -y g++
+RUN g++ -o client client.cpp
+CMD ./client
