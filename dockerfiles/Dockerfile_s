@@ -1,8 +1,9 @@
-FROM ubuntu 
-RUN mkdir -p server
-WORKDIR /server
-COPY ./Client_server_graph/server.cpp ./
-RUN apt-get update
-RUN apt-get install -y g++
+FROM alpine
+RUN apk update
+RUN apk upgrade
+RUN apk add git
+RUN apk add g++
+RUN git clone https://github.com/p0l0satik/Client_server_graph.git
+WORKDIR Client_server_graph
 RUN g++ -o server server.cpp
 CMD ./server
