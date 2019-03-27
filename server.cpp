@@ -190,9 +190,14 @@ void build_graph(int sockfd, graph_t &graph) {
                 graph[buf[j]][buf[j + 1]] = buf[j + 2]; 
             }
         } else if (m % (BUF_SIZE / 3)) {//receive what is left
+            std::cout << m % (BUF_SIZE / 3) << std::endl;
             recv_arr(sockfd, buf, m % (BUF_SIZE / 3) * 3 * sizeof(int), 0);
-            for(int j = 0; j < m % (BUF_SIZE / 3); j += 3) {
+            for (int t = 0; t < m % (BUF_SIZE / 3) * 3; t++) {
+                std::cout << t <<" " << buf[t] << std::endl;
+            }
+            for(int j = 0, t = 0; t < m % (BUF_SIZE / 3); ++t, j += 3) {
                 graph[buf[j]][buf[j + 1]] = buf[j + 2]; 
+                std::cout << graph[buf[j]][buf[j + 1]] << std::endl;
             }
         }
         
