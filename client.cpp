@@ -166,7 +166,9 @@ void talk_with_serv(int sockfd) {
 int main()
 {
     int sockfd; //client fd
-    const char serv_ip[] = "127.0.0.1";
+    std::cout << "Enter IP:" << std::endl;
+    char serv_ip[15];
+    scanf("%s", serv_ip);
     const int port = 49150;
     con_to_sv(sockfd, port, serv_ip);
     talk_with_serv(sockfd);
