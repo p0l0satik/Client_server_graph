@@ -79,9 +79,17 @@ int  client_ctl(int sockfd, int &pid, int type, const graph_t &graph) {
             int res = calc_dist(args[0], args[1], graph);
             send_int(sockfd, res, 0);
         } else if (command == 0) {
-            std::cout << "End od sessin with Client:" << pid << std::endl;
+            std::cout << "End od session with Client:" << pid << std::endl;
             close(sockfd);
             return 0;
+        } else if (command == 2) {
+            int args[2];
+            recv_arr(sockfd, args, 2 * sizeof(int), 0);
+            std::vector <int> path;
+            int res = calc_dist(args[0], args[1], graph, path);
+            send_int(sockfd, res, 0);
+            send_path(sockfd, path);
+            
         } else {
             std::cout << "Undefined command";
             close(sockfd);
@@ -102,7 +110,7 @@ int main()
     while(1)
     {   
         ac_cl(client, listener);
-        if (fork() == 0) {
+        // if (fork() == 0) {
             int pid = 0;
             graph_t graph;
 
@@ -113,7 +121,7 @@ int main()
             print_graph(graph);
 
             while(client_ctl(client, pid, 3, graph)) {}
-        }
+        // }
         close(client);
         
     }

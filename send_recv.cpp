@@ -1,4 +1,4 @@
-#include "send_recv.h"
+#include "headers/send_recv.h"
 
 int send_arr(int sockfd, int *arr, int len, int flags) {
     int alr_sent = 0;
