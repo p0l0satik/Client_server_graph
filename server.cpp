@@ -68,10 +68,43 @@ enum
     CLIENT_TALK = 3,
     DIST_SIMPL = 1,
     DIST_PATH = 2,
-    CL_QUIT = 0
+    CL_QUIT = 0,
+    ADD_NODE = 3,
+    ADD_EDGE = 4,
+    EXISTS = 0,
+    ADDED = 1,
+    NO_NODES = 3
 };
 
-int  client_ctl(int sockfd, int &pid, int type, const graph_t &graph) {
+void add_node(int sockfd, graph_t &graph) {
+    int node;
+    recv_int(sockfd, node, 0);
+    if (graph.find(node) != graph.end()) {
+        send_int(sockfd, EXISTS, 0);
+    } else {
+        graph[node] = std::map <int, int> ();
+        std::cout << "Client added node:" << node << std::endl;
+        send_int(sockfd, ADDED, 0);
+    }
+}
+
+void add_edge(int sockfd, graph_t &graph) {
+    int arr[3];
+    recv_arr(sockfd, arr, 3 * sizeof(*arr), 0);
+    if (graph.find(arr[0]) == graph.end() || graph.find(arr[1]) == graph.end()){
+        send_int(sockfd, NO_NODES, 0);
+        return;
+    }
+    if (graph[arr[0]].find(arr[1]) != graph[arr[0]].end()) {
+        send_int(sockfd, EXISTS, 0);
+    } else {
+        graph[arr[0]][arr[1]] = arr[2];
+        std::cout << "Client added edge:" << arr[0] << " " << arr[1] << " " << arr[2] << std::endl;
+        send_int(sockfd, ADDED, 0);
+    }
+}
+
+int client_ctl(int sockfd, int type, graph_t &graph) {
     if (type == CONNECTED) {
         std::cout << "Client connected."<< std::endl;
     }
@@ -83,7 +116,6 @@ int  client_ctl(int sockfd, int &pid, int type, const graph_t &graph) {
     if (type == CLIENT_TALK) {
         int command = 0;
         recv_int(sockfd, command, 0);
-
         if (command == DIST_SIMPL) {
 
             int args[2];
@@ -105,6 +137,10 @@ int  client_ctl(int sockfd, int &pid, int type, const graph_t &graph) {
             send_int(sockfd, res, 0);
             send_path(sockfd, path);
             
+        } else if(command == ADD_NODE) {
+            add_node(sockfd, graph);
+        } else if(command == ADD_EDGE) {
+            add_edge(sockfd, graph);
         } else {
             std::cout << "Undefined command. Closing conection.";
             close(sockfd);
@@ -125,16 +161,15 @@ int main()
     while(1)
     {   
         ac_cl(client, listener);
-        int pid = 0;
         graph_t graph;
 
-        client_ctl(client, pid, CONNECTED, graph);
+        client_ctl(client, CONNECTED, graph);
         build_graph(client, graph);
 
-        client_ctl(client, pid, SEND_GRAPH, graph);
+        client_ctl(client, SEND_GRAPH, graph);
         
 
-        while(client_ctl(client, pid, CLIENT_TALK, graph)) {}
+        while(client_ctl(client, CLIENT_TALK, graph)) {}
    
         close(client);
         
