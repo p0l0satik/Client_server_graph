@@ -7,12 +7,12 @@ void send_data_about_graph(int sockfd) {
     int m, n;
     int *buf = new int[BUF_SIZE];
 
-    std::cout << "enter number of nodes:" << std::endl;
+    std::cout << "Please, enter number of nodes:" << std::endl;
     std::cin >> n;
 
     send_int(sockfd, n, 0);
 
-    std::cout << "enter the nodes:" << std::endl;
+    std::cout << "Please, enter the nodes:" << std::endl;
     for(int t = 0, j = 0; t <= n; ++t, ++j) {
         if (t < n) {
             std::cin >> a;
@@ -28,12 +28,12 @@ void send_data_about_graph(int sockfd) {
         }
     }
 
-    std::cout << "enter number of edges:" << std::endl;
+    std::cout << "Please, enter number of edges:" << std::endl;
     std::cin >> m;   
    
     send_int(sockfd, m, 0);
    
-    std::cout << "enter the edges in format - node_from, node_to and edge_cost:" << std::endl;
+    std::cout << "Please, enter the edges in format(three numbers): node_from node_to edge_cost:" << std::endl;
     
     for(int t = 0, j = 0; t <= m; t++) {
         if (t < m) {
@@ -107,9 +107,9 @@ void send_from_file(int sockfd) {
     std::cout << "Data in your file should be specified in a special order:" << std::endl;
     std::cout << "Number of nodes" << std::endl; 
     std::cout << "The list of nodes (a number for each node)" << std::endl;
-    std::cout << "number of edges" << std::endl;
-    std::cout << "The list of edges (three numbers for each edge:node_from, node_to and edge_cost)" << std::endl;
-    std::cout << "Enter path to you file:" << std::endl;
+    std::cout << "Number of edges" << std::endl;
+    std::cout << "The list of edges (three numbers for each edge: node_from, node_to and edge_cost)" << std::endl;
+    std::cout << "Please, enter path to you file:" << std::endl;
     const int MAX_PATH = 4096;
     char *filepath = new char[MAX_PATH];
     std::cin >> filepath;

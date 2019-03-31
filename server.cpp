@@ -56,33 +56,48 @@ void print_graph(const graph_t &graph) {
     for (auto i = graph.begin(); i != graph.end(); ++i) {
         std::cout << i->first << ":" << std::endl;
         for (auto j = i->second.begin(); j != i->second.end(); ++j) {
-            std::cout << j->first << " weight " << j->second << std::endl; 
+            std::cout << "    " << j->first << " weight " << j->second << std::endl; 
         }
     }
 }
 
+enum 
+{
+    CONNECTED = 1,
+    SEND_GRAPH = 2,
+    CLIENT_TALK = 3,
+    DIST_SIMPL = 1,
+    DIST_PATH = 2,
+    CL_QUIT = 0
+};
+
 int  client_ctl(int sockfd, int &pid, int type, const graph_t &graph) {
-    if (type == 1) {
-        recv_int(sockfd, pid, 0);
-        std::cout << "Client connected, his pid:" << pid << std::endl;
+    if (type == CONNECTED) {
+        std::cout << "Client connected."<< std::endl;
     }
-    if (type == 2) {
-        std::cout << "Client " << pid <<" sent a graph:" << std::endl;
+    if (type == SEND_GRAPH) {
+        std::cout << "Client sent a graph:" << std::endl;
+        print_graph(graph);
     }
     
-    if (type == 3) {
+    if (type == CLIENT_TALK) {
         int command = 0;
         recv_int(sockfd, command, 0);
-        if (command == 1) {
+
+        if (command == DIST_SIMPL) {
+
             int args[2];
             recv_arr(sockfd, args, 2 * sizeof(int), 0);
             int res = calc_dist(args[0], args[1], graph);
             send_int(sockfd, res, 0);
-        } else if (command == 0) {
-            std::cout << "End od session with Client:" << pid << std::endl;
+
+        } else if (command == CL_QUIT) {
+
+            std::cout << "End of session with client." << std::endl;
             close(sockfd);
             return 0;
-        } else if (command == 2) {
+
+        } else if (command == DIST_PATH) {
             int args[2];
             recv_arr(sockfd, args, 2 * sizeof(int), 0);
             std::vector <int> path;
@@ -91,7 +106,7 @@ int  client_ctl(int sockfd, int &pid, int type, const graph_t &graph) {
             send_path(sockfd, path);
             
         } else {
-            std::cout << "Undefined command";
+            std::cout << "Undefined command. Closing conection.";
             close(sockfd);
             return 0;
         }
@@ -110,18 +125,17 @@ int main()
     while(1)
     {   
         ac_cl(client, listener);
-        // if (fork() == 0) {
-            int pid = 0;
-            graph_t graph;
+        int pid = 0;
+        graph_t graph;
 
-            client_ctl(client, pid, 1, graph);
-            build_graph(client, graph);
+        client_ctl(client, pid, CONNECTED, graph);
+        build_graph(client, graph);
 
-            client_ctl(client, pid, 2, graph);
-            print_graph(graph);
+        client_ctl(client, pid, SEND_GRAPH, graph);
+        
 
-            while(client_ctl(client, pid, 3, graph)) {}
-        // }
+        while(client_ctl(client, pid, CLIENT_TALK, graph)) {}
+   
         close(client);
         
     }
