@@ -3,7 +3,7 @@ A client server application allowing to calculate the shortest route between nod
 
 #Как развернуть сервис на площадке play with docker:
 1. Регистрация:
-    - зарегистрируйтесь на сервисе Docker Hub: https://hub.docker.com, вы создадите новый Docker ID
+    - зарегистрируйтесь на сервисе Docker Hub: [DockerHub]https://hub.docker.com, вы создадите новый Docker ID
     - Перейдите по ссылке: https://labs.play-with-docker.com
     - Авторизируйтесь с помощью только что полученного Docker ID
     - Вы создадите сессию, длинной в 4 часа
