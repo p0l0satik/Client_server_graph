@@ -13,6 +13,8 @@
 #include "headers/send_recv.h"
 #include "headers/graph_transmit.h"
 #include "headers/FB.h"
+#include "headers/djkstra.h"
+
 
 
 using graph_t = std::map<int, std::map<int, int> >; //node to node and cost
@@ -35,6 +37,7 @@ enum
     SHOW_GR = 6,
     NO_EXISTS = 0,
     CHANGED = 1,
+    COMPARE = 7,
 };
 
 void start_sv(int &listener, const int port, const int q_size) {
@@ -192,6 +195,15 @@ int client_ctl(int sockfd, int type, graph_t &graph) {
             change_edge(sockfd, graph);
         } else if (command == SHOW_GR) {
             show_graph(sockfd, graph);
+        } else if (command == COMPARE){
+            int args[2];
+            recv_arr(sockfd, args, 2 * sizeof(int), 0);
+            std::vector <int> path;
+            int res = calc_dist(args[0], args[1], graph, path);
+            int res2 = calc_dist_DJ(args[0], args[1], graph);
+            send_int(sockfd, res, 0);
+            send_int(sockfd, res2, 0);
+            send_path(sockfd, path);
         } else {
             std::cout << "Undefined command. Closing conection.";
             close(sockfd);

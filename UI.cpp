@@ -19,7 +19,8 @@ enum {
     CHANGE = 5,
     NO_EXISTS = 0,
     CHANGED = 1,
-    SHOW_GRAPH = 6
+    SHOW_GRAPH = 6,
+    COMPARISON = 7
 };
 
 void dist_pr(int sockfd, int command) {
@@ -35,8 +36,13 @@ void dist_pr(int sockfd, int command) {
     if (len == INF) {
         std::cout << "There is no connection between nodes." << std::endl;
     } else {
-        std::cout << "Distance between nodes is:" << std::endl << len << std::endl;
-        if (command == 2){
+        std::cout << "Distance between nodes by Ford-Bellmans algorith is:" << std::endl << len << std::endl;
+        if (command == DIST_PATH || command == COMPARISON){
+            if (command == COMPARISON){
+                int len2;
+                recv_int(sockfd, len2, 0);
+                std::cout << "Distance between nodes by Dijkstras algorith is:" << std::endl << len2 << std::endl; 
+            }
             std::vector <int> path;
             get_path(sockfd, path);
             std::cout << "The shortest route is:" << std::endl;
@@ -254,11 +260,13 @@ void talk_with_serv(int sockfd) {
         std::cout << "4 - add a new edge" << std::endl;
         std::cout << "5 - change existing edge" << std::endl;
         std::cout << "6 - print your graph" << std::endl;
+        std::cout << "7 - test different algorithms" << std::endl;
         std::cout << "0 - quit" << std::endl;
         int command;
         std::cin >> command;
         while (command != CL_QUIT && command != DIST_PATH && command != DIST_SIMPL 
-            && command != ADD_NODE && command != ADD_EDGE  && command != CHANGE && command != SHOW_GRAPH)  {
+            && command != ADD_NODE && command != ADD_EDGE  && command != CHANGE 
+            && command != SHOW_GRAPH && command != COMPARISON)  {
             std::cout << "Wrong command. Please, try again." << std::endl;
             std::cin >> command;
         }
@@ -275,6 +283,8 @@ void talk_with_serv(int sockfd) {
             change_endge(sockfd);
         } else if (command == SHOW_GRAPH) {
             show_graph(sockfd);
+        } else if (command == COMPARISON) {
+            dist_pr(sockfd, command);
         }
     }
 }
