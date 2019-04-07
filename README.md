@@ -1,7 +1,7 @@
 # Client_server_graph
-A client server application allowing to calculate the shortest route between nodes
 
-#Как развернуть сервис на площадке play with docker:
+
+# Как развернуть сервис на площадке play with docker:
 1. Регистрация:
     - зарегистрируйтесь на сервисе Docker Hub: [DockerHub]https://hub.docker.com, вы создадите новый Docker ID
     - Перейдите по ссылке: https://labs.play-with-docker.com
@@ -29,7 +29,7 @@ A client server application allowing to calculate the shortest route between nod
     когда клиент запустится, он попросит вас ввести IP адресс сервера, введите адрес того хоста на котором запущен 
     контейнер сервера
 
-#Как запустить многопользовательское приложение с использованием docker swarm
+# Как запустить многопользовательское приложение с использованием docker swarm
 1. Сессия
     Создание сессию на площадке: https://labs.play-with-docker.com
 2. Инициализация swarm
