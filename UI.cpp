@@ -11,9 +11,15 @@ enum {
     ADD_NODE = 3,
     ADDED = 1,
     QUIT_ADD = 0,
+    QUIT_CH = 0,
     DUBL = 0,
     CONT_ADD = 1,
-    NO_NODES = 3
+    CONT_CH = 1,
+    NO_NODES = 3,
+    CHANGE = 5,
+    NO_EXISTS = 0,
+    CHANGED = 1,
+    SHOW_GRAPH = 6
 };
 
 void dist_pr(int sockfd, int command) {
@@ -98,7 +104,7 @@ void add_edge_dub_say() {
 void add_edge_serv_talk(int sockfd, int &response) {
     int arr[3];
     send_int(sockfd, ADD_EDGE, 0);
-    std::cout << "Please, enter the number of your edge(three numbers, from to cost):" << std:: endl;
+    std::cout << "Please, enter the numbers of your edge(three numbers, from to cost):" << std:: endl;
     std::cin >> arr[0] >> arr[1] >> arr[2];
     send_arr(sockfd, arr, 3 * sizeof(*arr), 0);
     recv_int(sockfd, response, 0);
@@ -139,6 +145,91 @@ void add_edge(int sockfd) {
     }
 }
 
+
+void ch_edge_ndub_say() {
+    std::cout << "Sorry, such edge does not exists. Would you like to try again?" <<std::endl;
+    std::cout << "Please, enter:" << std::endl;
+    std::cout << "1 if you want to enter another edge" << std::endl;
+    std::cout << "0 if you want to return to the previous menu" << std::endl;
+}
+void ch_edge_serv_talk(int sockfd, int &response) {
+    int arr[3];
+    send_int(sockfd, CHANGE, 0);
+    std::cout << "Please, enter the numbers of your edge(three numbers, from to cost):" << std:: endl;
+    std::cin >> arr[0] >> arr[1] >> arr[2];
+    send_arr(sockfd, arr, 3 * sizeof(*arr), 0);
+    recv_int(sockfd, response, 0);
+} 
+
+void change_endge(int sockfd) {
+    int response;
+    ch_edge_serv_talk(sockfd, response);
+    if (response == CHANGED) {
+        std::cout << "An edge was successfully changed!" << std::endl;
+    } else {
+        if (response == NO_NODES) {
+            std::cout << "Sorry, there is no such nodes. Please add them before changing the edge." << std::endl;
+            return;
+        }
+        ch_edge_ndub_say();
+        int command;
+        std::cin >> command;
+        while (response != CHANGED && command != QUIT_CH) {
+            if (response == NO_NODES) {
+                std::cout << "Sorry, there is no such nodes. Please add them before changing the edge." << std::endl;
+                return;
+            }
+            if (command == CONT_ADD) {
+                ch_edge_serv_talk(sockfd, response);
+                if (response == NO_EXISTS) {
+                    ch_edge_ndub_say();
+                    std::cin >> command;
+                }
+            } else {
+                std::cout << "Please, enter correct command:" << std::endl;
+                std::cin >> command;
+            }
+        }
+        if (response == ADDED) {
+            std::cout << "An edge was successfully changed!" << std::endl;
+        }
+    }
+}
+
+void show_graph(int sockfd) {
+    send_int(sockfd, SHOW_GRAPH, 0);
+    int n = 0;
+    recv_int(sockfd, n, 0);
+    if (n == 0) {
+        std::cout << "Sorry, your graph is empty." << std::endl;
+        return;
+    }
+    int *buf = new int[BUF_SIZE];
+    for(int t = 0; t < n; t++) {
+        int node = 0;
+        int m = 0;
+        recv_int(sockfd, node, 0);
+        recv_int(sockfd, m, 0);
+        std::cout << "node " << node << " connects:" << std::endl;  
+        if (m == 0) {
+            std::cout << "   none" << std::endl; 
+        }
+        for (int t = 0; t <= m / (BUF_SIZE / 2); ++t) {
+            if (t < m / (BUF_SIZE / 2)) {// receive by whole buffers
+                recv_arr(sockfd, buf, BUF_SIZE * sizeof(int), 0);
+                for(int j = 0; j < BUF_SIZE; j += 2) { 
+                    std::cout <<"   -> " << buf[j] << " weight " << buf[j + 1] << std::endl;
+                }
+            } else if (m % (BUF_SIZE / 2)) {//receive what is left
+                recv_arr(sockfd, buf, m % (BUF_SIZE / 2) * 2 * sizeof(int), 0);
+                for(int j = 0, t = 0; t < m % (BUF_SIZE / 2); ++t, j += 2) {
+                    std::cout <<"   -> " << buf[j] << " weight " << buf[j + 1] << std::endl;
+                }
+            }
+        }
+    }
+    delete[] buf;
+}
 void talk_with_serv(int sockfd) {
 
     int how;
@@ -161,11 +252,13 @@ void talk_with_serv(int sockfd) {
         std::cout << "2 - get the shortest path between two nodes" << std::endl;
         std::cout << "3 - add a new node" << std::endl;
         std::cout << "4 - add a new edge" << std::endl;
+        std::cout << "5 - change existing edge" << std::endl;
+        std::cout << "6 - print your graph" << std::endl;
         std::cout << "0 - quit" << std::endl;
         int command;
         std::cin >> command;
         while (command != CL_QUIT && command != DIST_PATH && command != DIST_SIMPL 
-            && command != ADD_NODE && command != ADD_EDGE)  {
+            && command != ADD_NODE && command != ADD_EDGE  && command != CHANGE && command != SHOW_GRAPH)  {
             std::cout << "Wrong command. Please, try again." << std::endl;
             std::cin >> command;
         }
@@ -178,6 +271,10 @@ void talk_with_serv(int sockfd) {
             add_edge(sockfd);
         } else if (command == ADD_NODE) {
             add_node(sockfd);
+        } else if (command == CHANGE) {
+            change_endge(sockfd);
+        } else if (command == SHOW_GRAPH) {
+            show_graph(sockfd);
         }
     }
 }

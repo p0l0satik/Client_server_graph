@@ -18,6 +18,25 @@
 using graph_t = std::map<int, std::map<int, int> >; //node to node and cost
 const int INF = 1000000000;
 
+enum 
+{
+    CONNECTED = 1,
+    SEND_GRAPH = 2,
+    CLIENT_TALK = 3,
+    DIST_SIMPL = 1,
+    DIST_PATH = 2,
+    CL_QUIT = 0,
+    ADD_NODE = 3,
+    ADD_EDGE = 4,
+    EXISTS = 0,
+    ADDED = 1,
+    NO_NODES = 3,
+    CHANGE = 5,
+    SHOW_GR = 6,
+    NO_EXISTS = 0,
+    CHANGED = 1,
+};
+
 void start_sv(int &listener, const int port, const int q_size) {
     struct sockaddr_in addr;
     listener = socket(AF_INET, SOCK_STREAM, 0);
@@ -61,20 +80,7 @@ void print_graph(const graph_t &graph) {
     }
 }
 
-enum 
-{
-    CONNECTED = 1,
-    SEND_GRAPH = 2,
-    CLIENT_TALK = 3,
-    DIST_SIMPL = 1,
-    DIST_PATH = 2,
-    CL_QUIT = 0,
-    ADD_NODE = 3,
-    ADD_EDGE = 4,
-    EXISTS = 0,
-    ADDED = 1,
-    NO_NODES = 3
-};
+
 
 void add_node(int sockfd, graph_t &graph) {
     int node;
@@ -103,6 +109,47 @@ void add_edge(int sockfd, graph_t &graph) {
         send_int(sockfd, ADDED, 0);
     }
 }
+void change_edge(int sockfd, graph_t &graph) {
+    int arr[3];
+    recv_arr(sockfd, arr, 3 * sizeof(*arr), 0);
+    if (graph.find(arr[0]) == graph.end() || graph.find(arr[1]) == graph.end()){
+        send_int(sockfd, NO_NODES, 0);
+        return;
+    }
+    if (graph[arr[0]].find(arr[1]) != graph[arr[0]].end()) {
+        graph[arr[0]][arr[1]] = arr[2];
+        std::cout << "Client changed edge:" << arr[0] << " " << arr[1] << " " << arr[2] << std::endl;
+        send_int(sockfd, CHANGED, 0);
+    } else {
+        send_int(sockfd, NO_EXISTS, 0);
+    }
+}
+
+void show_graph(int sockfd, const graph_t &graph) {
+    int n = graph.size();
+    send_int(sockfd, n, 0);
+    int *buf = new int[BUF_SIZE];
+
+    for (auto t = graph.begin(); t != graph.end(); t++){
+        send_int(sockfd, t->first, 0);
+        int m = (t->second).size();
+        send_int(sockfd, m, 0);
+        int k = 0; 
+        for(auto j = (t->second).begin(); j != (t->second).end(); j++) {
+            buf[k++] = j->first;
+            buf[k++] = j->second;
+            if(k == BUF_SIZE) { //send when buf is full
+                send_arr(sockfd, buf, BUF_SIZE * sizeof(int), 0);
+                k = 0;
+            }
+        }
+        if (k != 0) { //send what is left(if there is smth)
+            send_arr(sockfd, buf, k * sizeof(int), 0);
+        }
+    }
+    delete[] buf;
+}
+
 
 int client_ctl(int sockfd, int type, graph_t &graph) {
     if (type == CONNECTED) {
@@ -141,6 +188,10 @@ int client_ctl(int sockfd, int type, graph_t &graph) {
             add_node(sockfd, graph);
         } else if(command == ADD_EDGE) {
             add_edge(sockfd, graph);
+        } else if(command == CHANGE) {
+            change_edge(sockfd, graph);
+        } else if (command == SHOW_GR) {
+            show_graph(sockfd, graph);
         } else {
             std::cout << "Undefined command. Closing conection.";
             close(sockfd);

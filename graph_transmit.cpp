@@ -157,7 +157,6 @@ void build_graph(int sockfd, graph_t &graph) {
                 graph[buf[j]][buf[j + 1]] = buf[j + 2]; 
             }
         }
-        
     }
     delete[] buf;
 }
