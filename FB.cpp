@@ -31,11 +31,13 @@ void get_path(parent_l_t parent, int to, int v, std::vector <int> &path) {
 
 
 
-void FB (const edge_v_t & edge_arr, parent_l_t &parent, node_l_t &dist) {
+int FB (const edge_v_t & edge_arr, parent_l_t &parent, node_l_t &dist) {
     bool change = true;
+    int operations = 0;
     while(change){
         change = false;
         for (int t = 0; t < edge_arr.size(); ++t){
+            operations++;
             if (dist[edge_arr[t].a] < INF) {
                 if (dist[edge_arr[t].b] > dist[edge_arr[t].a] + edge_arr[t].cost) {
                     dist[edge_arr[t].b] =  dist[edge_arr[t].a] + edge_arr[t].cost;
@@ -54,7 +56,7 @@ void print_calcs(int v, const node_l_t &dist){
     }
 }
 
-int calc_dist(int v, int to, const graph_t &graph, std::vector <int> &path) {
+int calc_dist(int v, int to, const graph_t &graph, std::vector <int> &path, int &op) {
     int n = graph.size();
     edge_v_t edge_arr;
     node_l_t dist;
@@ -64,7 +66,7 @@ int calc_dist(int v, int to, const graph_t &graph, std::vector <int> &path) {
     fill_dist_and_parent(dist, parent, graph);
     dist[v] = 0;
 
-    FB(edge_arr, parent, dist);
+    op = FB(edge_arr, parent, dist);
     if (dist[to] < INF) {
         get_path(parent, to, v, path);
     }

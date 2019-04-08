@@ -183,7 +183,8 @@ int client_ctl(int sockfd, int type, graph_t &graph) {
             int args[2];
             recv_arr(sockfd, args, 2 * sizeof(int), 0);
             std::vector <int> path;
-            int res = calc_dist(args[0], args[1], graph, path);
+            int op;
+            int res = calc_dist(args[0], args[1], graph, path, op);
             send_int(sockfd, res, 0);
             send_path(sockfd, path);
             
@@ -199,10 +200,13 @@ int client_ctl(int sockfd, int type, graph_t &graph) {
             int args[2];
             recv_arr(sockfd, args, 2 * sizeof(int), 0);
             std::vector <int> path;
-            int res = calc_dist(args[0], args[1], graph, path);
-            int res2 = calc_dist_DJ(args[0], args[1], graph);
+            int op1 = 0, op2 = 0;
+            int res = calc_dist(args[0], args[1], graph, path, op1);
+            int res2 = calc_dist_DJ(args[0], args[1], graph, op2);
             send_int(sockfd, res, 0);
             send_int(sockfd, res2, 0);
+            send_int(sockfd, op1, 0);
+            send_int(sockfd, op2, 0);
             send_path(sockfd, path);
         } else {
             std::cout << "Undefined command. Closing conection.";

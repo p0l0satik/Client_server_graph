@@ -36,12 +36,16 @@ void dist_pr(int sockfd, int command) {
     if (len == INF) {
         std::cout << "There is no connection between nodes." << std::endl;
     } else {
-        std::cout << "Distance between nodes by Ford-Bellmans algorith is:" << std::endl << len << std::endl;
+        std::cout << "Distance between nodes by Ford-Bellman's algorith is:" << std::endl << len << std::endl;
         if (command == DIST_PATH || command == COMPARISON){
             if (command == COMPARISON){
-                int len2;
+                int len2, oper_DJ, oper_FB;
                 recv_int(sockfd, len2, 0);
-                std::cout << "Distance between nodes by Dijkstras algorith is:" << std::endl << len2 << std::endl; 
+                recv_int(sockfd, oper_FB, 0);
+                recv_int(sockfd, oper_DJ, 0);
+                std::cout << "Distance between nodes by Dijkstra's algorith is:" << std::endl << len2 << std::endl;
+                std::cout << "Operations by Ford-Bellman's algorith: " << oper_FB << std::endl;
+                std::cout << "Operations by Dijkstra's algorith: " << oper_DJ << std::endl; 
             }
             std::vector <int> path;
             get_path(sockfd, path);
