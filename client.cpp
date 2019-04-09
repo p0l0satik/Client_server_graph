@@ -44,7 +44,7 @@ int main()
 {
     int sockfd; //client fd
     std::cout << "Please, enter server IP:" << std::endl;
-    char serv_ip[15];
+    char serv_ip[16];
     scanf("%s", serv_ip);
     const int port = 49150;
     con_to_sv(sockfd, port, serv_ip);
