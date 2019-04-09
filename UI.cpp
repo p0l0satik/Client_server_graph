@@ -20,7 +20,8 @@ enum {
     NO_EXISTS = 0,
     CHANGED = 1,
     SHOW_GRAPH = 6,
-    COMPARISON = 7
+    COMPARISON = 7,
+    SH_DW = -1,
 };
 
 void dist_pr(int sockfd, int command) {
@@ -242,18 +243,20 @@ void show_graph(int sockfd) {
 }
 void talk_with_serv(int sockfd) {
 
-    int how;
+    std::string how;
     std::cout << "How would you like to enter the graph? Please, enter the number:" << std::endl;
     std::cout << "1 - via a command line" << std::endl;
     std::cout << "2 - via a file" << std::endl;
-    std::cin >> how;
-    while (how != CL_E && how != FILE_E) {
+    getline(std::cin, how);
+    getline(std::cin, how);
+    std::cout << how << std::endl;
+    while (how[0] != '1' && how[0] != '2') {
         std::cout << "Wrong mode. Please, try again." << std::endl;
-        std::cin >> how;
+        getline(std::cin, how);
     }
-    if (how == CL_E) {
+    if (how[0] == '1') {
         send_data_about_graph(sockfd);
-    } else if (how == FILE_E) {
+    } else if (how[0] == '2') {
         send_from_file(sockfd);
     } 
     while (1) {

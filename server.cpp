@@ -38,6 +38,7 @@ enum
     NO_EXISTS = 0,
     CHANGED = 1,
     COMPARE = 7,
+    SH_DW = -1,
 };
 
 void start_sv(int &listener, const int port, const int q_size) {
@@ -133,12 +134,12 @@ void show_graph(int sockfd, const graph_t &graph) {
     send_int(sockfd, n, 0);
     int *buf = new int[BUF_SIZE];
 
-    for (auto t = graph.begin(); t != graph.end(); t++){
+    for (auto t = graph.begin(); t != graph.end(); ++t){
         send_int(sockfd, t->first, 0);
         int m = (t->second).size();
         send_int(sockfd, m, 0);
         int k = 0; 
-        for(auto j = (t->second).begin(); j != (t->second).end(); j++) {
+        for(auto j = (t->second).begin(); j != (t->second).end(); ++j) {
             buf[k++] = j->first;
             buf[k++] = j->second;
             if(k == BUF_SIZE) { //send when buf is full
@@ -176,7 +177,6 @@ int client_ctl(int sockfd, int type, graph_t &graph) {
         } else if (command == CL_QUIT) {
 
             std::cout << "End of session with client." << std::endl;
-            close(sockfd);
             return 0;
 
         } else if (command == DIST_PATH) {
@@ -185,8 +185,11 @@ int client_ctl(int sockfd, int type, graph_t &graph) {
             std::vector <int> path;
             int op;
             int res = calc_dist(args[0], args[1], graph, path, op);
+            print_graph(graph);
             send_int(sockfd, res, 0);
-            send_path(sockfd, path);
+            if (path.size() > 0) {
+                send_path(sockfd, path);
+            }
             
         } else if(command == ADD_NODE) {
             add_node(sockfd, graph);
@@ -195,6 +198,7 @@ int client_ctl(int sockfd, int type, graph_t &graph) {
         } else if(command == CHANGE) {
             change_edge(sockfd, graph);
         } else if (command == SHOW_GR) {
+            
             show_graph(sockfd, graph);
         } else if (command == COMPARE){
             int args[2];
@@ -202,12 +206,18 @@ int client_ctl(int sockfd, int type, graph_t &graph) {
             std::vector <int> path;
             int op1 = 0, op2 = 0;
             int res = calc_dist(args[0], args[1], graph, path, op1);
-            int res2 = calc_dist_DJ(args[0], args[1], graph, op2);
             send_int(sockfd, res, 0);
-            send_int(sockfd, res2, 0);
-            send_int(sockfd, op1, 0);
-            send_int(sockfd, op2, 0);
-            send_path(sockfd, path);
+            if (res != INF){
+                int res2 = calc_dist_DJ(args[0], args[1], graph, op2);
+                
+                send_int(sockfd, res2, 0);
+                send_int(sockfd, op1, 0);
+                send_int(sockfd, op2, 0);
+                if (path.size() > 0) {
+                    send_path(sockfd, path);
+                }
+            }
+            
         } else {
             std::cout << "Undefined command. Closing conection.";
             close(sockfd);
@@ -231,6 +241,7 @@ int main()
         graph_t graph;
 
         client_ctl(client, CONNECTED, graph);
+        
         build_graph(client, graph);
 
         client_ctl(client, SEND_GRAPH, graph);

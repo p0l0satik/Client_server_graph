@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <string>
 
 #include "send_recv.h"
 #include "graph_transmit.h"

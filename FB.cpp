@@ -4,7 +4,6 @@
 const int INF = 1000000000;
 
 
-
 void graph_to_arr(const graph_t &graph, std::vector<edge> &edge_arr, const int &n) {
 
     for (auto i = graph.begin(); i != graph.end(); ++i) {
@@ -47,6 +46,7 @@ int FB (const edge_v_t & edge_arr, parent_l_t &parent, node_l_t &dist) {
             }
         }
     }
+    return operations;
 }
 
 void print_calcs(int v, const node_l_t &dist){
