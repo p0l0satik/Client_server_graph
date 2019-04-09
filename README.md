@@ -105,7 +105,7 @@
     - Создание сессию на площадке: [Play with docker](https://labs.play-with-docker.com)
 2. Инициализация swarm
     - Создайте хост и запустите swarm командой:
-    - docker `swarm init --advertise-addr %ip_of_your_host%`
+    - `docker swarm init --advertise-addr %ip_of_your_host%`
     - вместо `%ip_of_your_host%` вам нужно подставить IP вашего хоста
 3. Добавление работников
     - есть два типа узлов - менеджер и работник. Предыдущей командой вы создали менеджера который будет управлять swarm. 
