@@ -248,8 +248,6 @@ void talk_with_serv(int sockfd) {
     std::cout << "1 - via a command line" << std::endl;
     std::cout << "2 - via a file" << std::endl;
     getline(std::cin, how);
-    getline(std::cin, how);
-    std::cout << how << std::endl;
     while (how[0] != '1' && how[0] != '2') {
         std::cout << "Wrong mode. Please, try again." << std::endl;
         getline(std::cin, how);
@@ -259,7 +257,9 @@ void talk_with_serv(int sockfd) {
     } else if (how[0] == '2') {
         send_from_file(sockfd);
     } 
+    getline(std::cin, how);
     while (1) {
+        std::cout << std::endl;
         std::cout << "Please, enter request to server:" << std::endl;
         std::cout << "1 - get distance between two nodes" << std::endl;
         std::cout << "2 - get the shortest path between two nodes" << std::endl;
@@ -269,29 +269,38 @@ void talk_with_serv(int sockfd) {
         std::cout << "6 - print your graph" << std::endl;
         std::cout << "7 - test different algorithms" << std::endl;
         std::cout << "0 - quit" << std::endl;
-        int command;
-        std::cin >> command;
-        while (command != CL_QUIT && command != DIST_PATH && command != DIST_SIMPL 
-            && command != ADD_NODE && command != ADD_EDGE  && command != CHANGE 
-            && command != SHOW_GRAPH && command != COMPARISON)  {
+        std::string command;
+        getline(std::cin, command);
+        while ((command[0] != '0' && command[0] != '1' && command[0] != '2'
+            && command[0] != '3' && command[0] != '4' && command[0] != '5'
+            && command[0] != '6' && command[0] != '7') || command.size() != 1)  {
             std::cout << "Wrong command. Please, try again." << std::endl;
-            std::cin >> command;
+            getline(std::cin, command);
         }
-        if (command == CL_QUIT) {
-            send_int(sockfd, command, 0);
+        std::cout << std::endl;
+        if (command[0] == '0') {
+            send_int(sockfd, CL_QUIT, 0);
             return;
-        } else if (command == DIST_SIMPL || command == DIST_PATH) {
-            dist_pr(sockfd, command);
-        } else if (command == ADD_EDGE) {
+        } else if (command[0] == '1'){
+            dist_pr(sockfd, DIST_SIMPL);
+            getline(std::cin, command);
+        } else if (command[0] == '4') {
             add_edge(sockfd);
-        } else if (command == ADD_NODE) {
+            getline(std::cin, command);
+        } else if (command[0] == '3') {
             add_node(sockfd);
-        } else if (command == CHANGE) {
+            getline(std::cin, command);
+        } else if (command[0] == '5') {
             change_endge(sockfd);
-        } else if (command == SHOW_GRAPH) {
+            getline(std::cin, command);
+        } else if (command[0] == '6') {
             show_graph(sockfd);
-        } else if (command == COMPARISON) {
-            dist_pr(sockfd, command);
+        } else if (command[0] == '7') {
+            dist_pr(sockfd, COMPARISON);
+            getline(std::cin, command);
+        } else if ( command[0] == '2') {
+            dist_pr(sockfd, DIST_PATH);
+            getline(std::cin, command);
         }
     }
 }

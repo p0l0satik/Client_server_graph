@@ -8,6 +8,7 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
+#include <string>
 
 #include "headers/send_recv.h"
 #include "headers/graph_transmit.h"
@@ -44,10 +45,10 @@ int main()
 {
     int sockfd; //client fd
     std::cout << "Please, enter server IP:" << std::endl;
-    char serv_ip[16];
-    scanf("%s", serv_ip);
+    std::string serv_ip;
+    getline(std::cin, serv_ip);
     const int port = 49150;
-    con_to_sv(sockfd, port, serv_ip);
+    con_to_sv(sockfd, port, serv_ip.c_str());
     talk_with_serv(sockfd);
     close(sockfd);
     return 0;
